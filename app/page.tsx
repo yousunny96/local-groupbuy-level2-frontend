@@ -6,10 +6,20 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const FACES = ["😢", "😕", "😐", "🙂", "😄"];
 
 interface Mood {
-  date: string;
+  id: number;
   score: number;
   note: string;
+  created_at: string;
 }
+
+const fmt = (iso: string) =>
+  new Date(iso).toLocaleString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 
 export default function Home() {
   const [moods, setMoods] = useState<Mood[]>([]);
@@ -22,11 +32,6 @@ export default function Home() {
       const res = await fetch(`${API}/moods`);
       const list: Mood[] = await res.json();
       setMoods(list);
-      const today = list.find((m) => m.date === new Date().toLocaleDateString("sv-SE"));
-      if (today) {
-        setScore(today.score);
-        setNote(today.note);
-      }
     } catch {
       setError("서버에 연결할 수 없어요");
     }
@@ -38,12 +43,14 @@ export default function Home() {
 
   async function save() {
     setError("");
-    const res = await fetch(`${API}/moods/today`, {
-      method: "PUT",
+    const res = await fetch(`${API}/moods`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ score, note }),
     }).catch(() => null);
     if (!res?.ok) return setError("저장하지 못했어요");
+    setScore(0);
+    setNote("");
     load();
   }
 
@@ -79,8 +86,8 @@ export default function Home() {
       <h2>최근 기록</h2>
       <ul>
         {moods.map((m) => (
-          <li key={m.date}>
-            <span className="d">{m.date.slice(5)}</span>
+          <li key={m.id}>
+            <span className="d">{fmt(m.created_at)}</span>
             <span>{FACES[m.score - 1]}</span>
             <span className="n">{m.note}</span>
           </li>
