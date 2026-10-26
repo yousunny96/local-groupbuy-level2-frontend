@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Nav } from "@/components/Nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "오늘 기분 기록기",
-  description: "하루 한 번, 오늘의 기분을 기록하세요",
+  title: "동네장터 공동구매",
+  description: "제철 농산물 공동구매를 신청하고 취소하세요",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko">
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <Suspense fallback={<div className="nav" style={{ height: 52 }} />}>
+          <Nav />
+        </Suspense>
+        <main>{children}</main>
+        <footer className="foot">모든 이름·연락처는 가상 데이터예요. 결제는 하지 않고 신청만 받아요.</footer>
+      </body>
     </html>
   );
 }
